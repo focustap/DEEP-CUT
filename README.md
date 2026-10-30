@@ -16,7 +16,16 @@ No account, backend, or multiplayer required. Best depth is saved locally on you
 
 ## Playing locally
 
-Open `index.html` in a browser once the game files are installed. You can also publish this repository using **GitHub Pages**. See the workflow under `.github/workflows/pages.yml`.
+Open `index.html` in a browser once the game files are installed. You can also publish this repository using **GitHub Pages**. The deployment workflow lives under `.github/workflows/pages.yml`.
+
+### Enable the public play link
+
+1. Open **Repository Settings → Pages** in GitHub.
+2. Under **Build and deployment**, select **GitHub Actions** as the Source.
+3. Open the **Actions** tab and run **Publish DEEP CUT to GitHub Pages** manually if it did not deploy automatically.
+4. The intended play URL is `https://focustap.github.io/DEEP-CUT/`.
+
+Until Pages is enabled and a deployment succeeds, the URL may not work. The BenGames launcher already has the game registered as **unpublished** to avoid a broken Play link during development.
 
 ## Answer grading
 
