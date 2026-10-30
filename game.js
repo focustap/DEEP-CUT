@@ -2,6 +2,8 @@
   "use strict";
 
   const TOTAL_ROUNDS = 10;
+  const QUESTION_MS = 30000;
+  const RESULT_MS = 2200;
   const MAX_DEPTH = TOTAL_ROUNDS * 200;
   const BEST_KEY = "deep-cut-personal-best-v1";
   const TIERS = [
@@ -72,6 +74,78 @@
   let checking = false;
   let history = [];
   let deepCuts = 0;
+  let remainingMs = QUESTION_MS;
+  let deadline = 0;
+  let clockHandle = null;
+  let nextHandle = null;
+  let sceneHandle = null;
+  let rejected = new Map();
+  let runId = 0;
+
+  function stopClock() {
+    if (clockHandle !== null) clearInterval(clockHandle);
+    clockHandle = null;
+  }
+  function clearAutoNext() {
+    if (nextHandle !== null) clearTimeout(nextHandle);
+    nextHandle = null;
+  }
+  function displayClock() {
+    const secs = Math.ceil(Math.max(0, remainingMs) / 1000);
+    $("timeLeft").textContent = "0:" + String(secs).padStart(2, "0");
+    $("timeLeft").setAttribute("aria-label", secs + " seconds remaining");
+    $("timerFill").style.width = Math.max(0, Math.min(100, 100 * remainingMs / QUESTION_MS)) + "%";
+    $("timerWrap").classList.toggle("urgent", secs <= 10 && secs > 0);
+  }
+  function pauseClock() {
+    if (clockHandle === null) return;
+    remainingMs = Math.max(0, deadline - performance.now());
+    stopClock();
+    $("timerWrap").classList.add("paused");
+    displayClock();
+  }
+  function tick() {
+    remainingMs = Math.max(0, deadline - performance.now());
+    displayClock();
+    if (remainingMs <= 0) timeUp();
+  }
+  function resumeClock() {
+    if (submitted) return;
+    $("timerWrap").classList.remove("paused");
+    if (remainingMs <= 0) { timeUp(); return; }
+    deadline = performance.now() + remainingMs;
+    stopClock();
+    clockHandle = setInterval(tick, 80);
+    displayClock();
+  }
+  function scheduleAdvance(delayMs) {
+    clearAutoNext();
+    const thisRun = runId;
+    const thisRound = round;
+    nextHandle = setTimeout(() => {
+      if (thisRun === runId && thisRound === round && submitted) advance();
+    }, delayMs);
+  }
+  function animateDig(points) {
+    const scene = $("gauge");
+    const terrain = $("terrain");
+    // The drill stays centered while the rock moves upward beneath it.
+    terrain.style.transform = "translateY(-" + Math.round(depth * 0.21) + "px)";
+    scene.classList.remove("is-drilling");
+    const feedback = $("sceneFeedback");
+    feedback.classList.remove("active");
+    feedback.textContent = "+" + points + " m";
+    if (sceneHandle !== null) clearTimeout(sceneHandle);
+    // Trigger CSS transitions even when rounds are graded in rapid succession.
+    void scene.offsetWidth;
+    scene.classList.add("is-drilling");
+    feedback.classList.add("active");
+    sceneHandle = setTimeout(() => {
+      scene.classList.remove("is-drilling");
+      feedback.classList.remove("active");
+      sceneHandle = null;
+    }, 1450);
+  }
 
   function switchScreen(screen) {
     [startScreen, gameScreen, endScreen].forEach((item) => { item.hidden = item !== screen; });
@@ -88,8 +162,8 @@
     $("score").textContent = depth.toLocaleString();
     $("shaftTotal").textContent = depth.toLocaleString() + " / " + MAX_DEPTH.toLocaleString() + " m";
     $("gaugeNumber").textContent = depth.toLocaleString() + " m";
-    const progress = Math.min(depth / MAX_DEPTH, 1);
-    $("gaugeDrill").style.top = (4 + (progress * 65)).toFixed(1) + "%";
+    // Keep the drill visually centered: only the terrain scrolls on a correct answer.
+    $("terrain").style.transform = "translateY(-" + Math.round(depth * 0.21) + "px)";
     $("gauge").setAttribute("aria-label", depth + " meters deep");
   }
 
@@ -134,8 +208,15 @@
   function renderQuestion() {
     const category = deck[round];
     if (!category) { finishRun(); return; }
+    stopClock();
+    clearAutoNext();
+    remainingMs = QUESTION_MS;
+    rejected = new Map();
     submitted = false;
     checking = false;
+    $("timerWrap").classList.remove("paused", "urgent");
+    $("timerNotice").textContent = "Invalid answer? Keep guessing until one gets through.";
+    $("unknownBox").textContent = "";
     $("submitBtn").textContent = "LOCK IN →";
     $("prompt").textContent = category.prompt;
     $("categoryNote").textContent = category.note;
@@ -151,6 +232,7 @@
     $("nextBtn").textContent = round === TOTAL_ROUNDS - 1 ? "SEE RESULTS →" : "NEXT QUESTION →";
     document.body.classList.remove("deep-hit");
     renderSegments();
+    resumeClock();
     $("answer").focus();
   }
 
@@ -159,6 +241,13 @@
       alert("The question bank is missing. Refresh the page and try again.");
       return;
     }
+    runId += 1;
+    stopClock();
+    clearAutoNext();
+    if (sceneHandle !== null) clearTimeout(sceneHandle);
+    sceneHandle = null;
+    $("gauge").classList.remove("is-drilling");
+    $("sceneFeedback").classList.remove("active");
     deck = shuffle(bank).slice(0, TOTAL_ROUNDS);
     round = 0;
     depth = 0;
@@ -176,6 +265,7 @@
   function showGrade(match) {
     const tier = TIERS[match.tierIndex];
     submitted = true;
+    pauseClock();
     depth += tier.points;
     if (match.tierIndex === 4) deepCuts += 1;
     history.push({
@@ -185,6 +275,7 @@
     });
     renderDrill();
     renderHistory();
+    animateDig(tier.points);
 
     $("rarityName").textContent = tier.label;
     $("acceptedName").textContent = "You answered: " + match.canonical;
@@ -195,7 +286,26 @@
     $("answerForm").hidden = true;
     $("skipBtn").disabled = true;
     if (tier.slug === "deep") document.body.classList.add("deep-hit");
-    $("nextBtn").focus();
+    scheduleAdvance(RESULT_MS);
+  }
+
+  function timeUp() {
+    if (submitted || checking) return;
+    submitted = true;
+    stopClock();
+    remainingMs = 0;
+    displayClock();
+    history.push({ number: round + 1, answer: "No answer (time up)", tier: null });
+    renderHistory();
+    $("answerForm").hidden = true;
+    $("unknownBox").hidden = true;
+    $("rarityName").textContent = "TIME'S UP!";
+    $("acceptedName").textContent = "No answer locked in this round.";
+    $("earnedPoints").textContent = "+0 METERS";
+    $("resultBox").className = "graded timeout";
+    $("resultBox").hidden = false;
+    $("skipBtn").disabled = true;
+    scheduleAdvance(1600);
   }
 
   async function submitAnswer(event) {
@@ -203,6 +313,9 @@
     if (submitted || checking) return;
     const raw = $("answer").value.trim();
     if (!raw) return;
+    // A late input cannot bypass the deadline if the UI interval was throttled.
+    if (clockHandle !== null) tick();
+    if (submitted) return;
     const category = deck[round];
     if (!category) return;
 
@@ -220,7 +333,16 @@
       return;
     }
 
+    const previous = rejected.get(norm(raw));
+    if (previous) {
+      $("unknownBox").textContent = previous;
+      $("unknownBox").hidden = false;
+      $("answer").select();
+      return;
+    }
     checking = true;
+    pauseClock();
+    $("timerNotice").textContent = "Checking that answer — clock paused.";
     $("unknownBox").hidden = true;
     $("answer").disabled = true;
     $("submitBtn").disabled = true;
@@ -238,10 +360,14 @@
           typeof result.canonical === "string" && result.canonical.trim()) {
         showGrade({ canonical: result.canonical.slice(0, 100), tierIndex: result.tierIndex });
       } else {
-        $("unknownBox").textContent = typeof result.message === "string"
+        const message = typeof result.message === "string"
           ? result.message
-          : "We couldn't verify that answer. Try another one or skip.";
+          : "We couldn't verify that answer. Try again.";
+        // Store only definitive rejections, never temporary outages or quota failures.
+        if (result.status === "invalid" || result.status === "unverified") rejected.set(norm(raw), message);
+        $("unknownBox").textContent = message;
         $("unknownBox").hidden = false;
+        $("answer").value = "";
       }
     } catch (_) {
       $("unknownBox").textContent = "Couldn't reach the AI judge. Try again or use a known answer.";
@@ -250,6 +376,8 @@
       checking = false;
       $("submitBtn").textContent = "LOCK IN →";
       if (!submitted) {
+        $("timerNotice").textContent = "Invalid answer? Keep guessing until one gets through.";
+        resumeClock();
         $("answer").disabled = false;
         $("submitBtn").disabled = false;
         $("skipBtn").disabled = false;
@@ -261,6 +389,7 @@
   function skipQuestion() {
     if (submitted || checking) return;
     submitted = true;
+    pauseClock();
     history.push({ number: round + 1, answer: deck[round].prompt + " — skipped", tier: null });
     renderHistory();
     advance();
@@ -268,12 +397,16 @@
 
   function advance() {
     if (!submitted) return;
+    clearAutoNext();
+    stopClock();
     round += 1;
     if (round >= TOTAL_ROUNDS) finishRun();
     else renderQuestion();
   }
 
   function finishRun() {
+    stopClock();
+    clearAutoNext();
     const newRecord = depth > best;
     if (newRecord) {
       best = depth;
@@ -295,6 +428,8 @@
   $("startBtn").addEventListener("click", begin);
   $("againBtn").addEventListener("click", begin);
   $("homeBtn").addEventListener("click", () => {
+    stopClock();
+    clearAutoNext();
     updateBest();
     switchScreen(startScreen);
     $("startBtn").focus();
