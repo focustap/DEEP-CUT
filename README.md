@@ -18,6 +18,24 @@ The basic version works without signing in. Best depth is saved locally on your 
 
 Open `index.html` in a browser once the game files are installed. You can also publish this repository using **GitHub Pages**. The deployment workflow lives under `.github/workflows/pages.yml`.
 
+### Drill presentation and verification
+
+The drill sits beneath the question. A single animation timeline moves the ground upward and updates all depth counters together. Awards scale the distance and duration; +200 m gets a slightly stronger dip and dust burst. Animations stop when idle or the tab is hidden. Reduced-motion mode updates depth immediately without vibration, dust, or scrolling.
+
+The Pages workflow stamps the deployed Git commit into `revision.js`. The top bar links that short ID to its GitHub commit; local previews show `COMMIT dev`.
+
+Generated artwork, saved assets, and exact generation prompts are documented in [assets/README.md](assets/README.md). The site remains plain HTML, CSS, and JavaScript; Playwright is a development-only test dependency.
+
+To run browser regressions with Node.js 20 or newer:
+
+```sh
+npm ci
+npx playwright install chromium
+npm test
+```
+
+Alternatively set `BROWSER_CHANNEL=chrome` to test an installed Chrome browser. Tests cover all five award tiers, synchronized counters and terrain, retries, mocked AI acceptance/rejection and timer pause, timeout, rapid advancement, 2,000 m completion, replay, mobile widths, reduced motion, and the commit label. Screenshots are saved in ignored `test-output/`. AI responses are mocked so tests do not call the live judge or need secrets.
+
 ### Enable the public play link
 
 1. Open **Repository Settings → Pages** in GitHub.

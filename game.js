@@ -78,7 +78,9 @@
   let deadline = 0;
   let clockHandle = null;
   let nextHandle = null;
-  let sceneHandle = null;
+  const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
+  let sceneFrame = null;
+  let displayedDepth = 0;
   let rejected = new Map();
   let runId = 0;
 
@@ -126,26 +128,56 @@
       if (thisRun === runId && thisRound === round && submitted) advance();
     }, delayMs);
   }
-  function animateDig(points) {
-    const scene = $("gauge");
-    const terrain = $("terrain");
-    // The drill stays centered while the rock moves upward beneath it.
-    terrain.style.transform = "translateY(-" + Math.round(depth * 0.21) + "px)";
-    scene.classList.remove("is-drilling");
-    const feedback = $("sceneFeedback");
-    feedback.classList.remove("active");
-    feedback.textContent = "+" + points + " m";
-    if (sceneHandle !== null) clearTimeout(sceneHandle);
-    // Trigger CSS transitions even when rounds are graded in rapid succession.
-    void scene.offsetWidth;
-    scene.classList.add("is-drilling");
-    feedback.classList.add("active");
-    sceneHandle = setTimeout(() => {
-      scene.classList.remove("is-drilling");
-      feedback.classList.remove("active");
-      sceneHandle = null;
-    }, 1450);
+  function stopDig() {
+    if (sceneFrame !== null) cancelAnimationFrame(sceneFrame);
+    sceneFrame = null;
+    $("gauge").classList.remove("is-drilling", "is-deep");
+    $("sceneFeedback").classList.remove("active");
   }
+
+  function settleDig() {
+    stopDig();
+    renderDrill(depth);
+  }
+
+  function animateDig(points) {
+    stopDig();
+    const scene = $("gauge");
+    const feedback = $("sceneFeedback");
+    $("sceneLabel").textContent = points === 200 ? "DEEP CUT!" : "GOING DEEPER";
+    $("scenePoints").textContent = "+" + points + " m";
+    // The same timeline drives every counter and the ground. Logical scoring
+    // remains immediate; presentation catches up before automatic progression.
+    const from = displayedDepth;
+    const target = depth;
+    const duration = 650 + Math.sqrt(points / 200) * 850;
+    scene.style.setProperty("--dig-duration", duration + "ms");
+    scene.style.setProperty("--dig-dip", (3 + points / 40) + "px");
+    void scene.offsetWidth;
+    scene.classList.toggle("is-deep", points === 200);
+    feedback.classList.add("active");
+    if (reducedMotion.matches) {
+      renderDrill(target);
+      return;
+    }
+    scene.classList.add("is-drilling");
+    const started = performance.now();
+    function frame(now) {
+      const progress = Math.min(1, (now - started) / duration);
+      const eased = 1 - Math.pow(1 - progress, 3);
+      renderDrill(from + (target - from) * eased);
+      if (progress < 1) sceneFrame = requestAnimationFrame(frame);
+      else settleDig();
+    }
+    sceneFrame = requestAnimationFrame(frame);
+  }
+
+  reducedMotion.addEventListener("change", () => {
+    if (reducedMotion.matches) settleDig();
+  });
+  document.addEventListener("visibilitychange", () => {
+    if (document.hidden) settleDig();
+  });
 
   function switchScreen(screen) {
     [startScreen, gameScreen, endScreen].forEach((item) => { item.hidden = item !== screen; });
@@ -158,13 +190,15 @@
     $("endBest").textContent = best.toLocaleString() + " m";
   }
 
-  function renderDrill() {
-    $("score").textContent = depth.toLocaleString();
-    $("shaftTotal").textContent = depth.toLocaleString() + " / " + MAX_DEPTH.toLocaleString() + " m";
-    $("gaugeNumber").textContent = depth.toLocaleString() + " m";
-    // Keep the drill visually centered: only the terrain scrolls on a correct answer.
-    $("terrain").style.transform = "translateY(-" + Math.round(depth * 0.21) + "px)";
-    $("gauge").setAttribute("aria-label", depth + " meters deep");
+  function renderDrill(value = depth) {
+    displayedDepth = value;
+    const meters = Math.round(value).toLocaleString();
+    $("score").textContent = meters;
+    $("shaftTotal").textContent = meters + " / " + MAX_DEPTH.toLocaleString() + " m";
+    $("gaugeNumber").textContent = meters + " m";
+    // Two mirrored 320px tiles repeat seamlessly, even across long runs.
+    $("terrain").style.transform = "translate3d(0,-" + ((value * 1.1) % 640).toFixed(2) + "px,0)";
+    $("gauge").setAttribute("aria-label", meters + " meters deep");
   }
 
   function renderHistory() {
@@ -230,7 +264,7 @@
     $("unknownBox").hidden = true;
     $("resultBox").hidden = true;
     $("nextBtn").textContent = round === TOTAL_ROUNDS - 1 ? "SEE RESULTS →" : "NEXT QUESTION →";
-    document.body.classList.remove("deep-hit");
+    $("sceneFeedback").classList.remove("active");
     renderSegments();
     resumeClock();
     $("answer").focus();
@@ -244,10 +278,7 @@
     runId += 1;
     stopClock();
     clearAutoNext();
-    if (sceneHandle !== null) clearTimeout(sceneHandle);
-    sceneHandle = null;
-    $("gauge").classList.remove("is-drilling");
-    $("sceneFeedback").classList.remove("active");
+    stopDig();
     deck = shuffle(bank).slice(0, TOTAL_ROUNDS);
     round = 0;
     depth = 0;
@@ -273,7 +304,6 @@
       answer: match.canonical,
       tier
     });
-    renderDrill();
     renderHistory();
     animateDig(tier.points);
 
@@ -285,7 +315,6 @@
     $("resultBox").hidden = false;
     $("answerForm").hidden = true;
     $("skipBtn").disabled = true;
-    if (tier.slug === "deep") document.body.classList.add("deep-hit");
     scheduleAdvance(RESULT_MS);
   }
 
@@ -407,6 +436,7 @@
   function finishRun() {
     stopClock();
     clearAutoNext();
+    settleDig();
     const newRecord = depth > best;
     if (newRecord) {
       best = depth;
@@ -440,4 +470,9 @@
 
   updateBest();
   renderDrill();
+  const revision = window.DEEP_CUT_REVISION;
+  if (typeof revision === "string" && /^[a-f0-9]{40}$/.test(revision)) {
+    $("buildRevision").textContent = "COMMIT " + revision.slice(0, 7);
+    $("buildRevision").href = "https://github.com/focustap/DEEP-CUT/commit/" + revision;
+  }
 })();

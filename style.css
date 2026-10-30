@@ -82,35 +82,21 @@ h1, h2, h3, p { margin-top: 0; }
 .best-pill { display: inline-flex; align-items: center; gap: 9px; color: #e1bf77; font-weight: 700; font-size: 13px; }
 .best-pill strong { font-size: 16px; color: #f5d999; }
 .art-scene {
-  min-height: 498px; position: relative; overflow: hidden;
-  border-radius: 16px; border: 1px solid #345167;
-  background: linear-gradient(180deg, #182d42 0, #122338 18%, #342d3c 19%, #262639 39%, #333147 40%, #20273c 59%, #343046 60%, #1c2334 79%, #483145 80%);
-  box-shadow: 0 20px 70px #0008;
+  min-height: 450px; position: relative; overflow: hidden;
+  border-radius: 16px; border: 1px solid #2c4458;
+  background: #101d2c; box-shadow: 0 20px 60px #0004;
 }
 .art-scene:after { content: ""; position: absolute; inset: 0; pointer-events: none;
-  background: radial-gradient(circle at 50% 40%, transparent, #060a15a0 95%);
+  background: radial-gradient(ellipse at 50% 45%, transparent 15%, #080e18b0 100%);
 }
-.stone-lines { position: absolute; inset: 0; opacity: .25; background:
-  repeating-linear-gradient(94deg, transparent 0 21px, #9ab3c125 22px 24px, transparent 25px 75px),
-  repeating-linear-gradient(2deg, transparent 0 55px, #080f1b99 56px 59px, transparent 60px 104px);
+.stone-lines { position: absolute; inset: 0; opacity: .6; background: url("assets/ground.webp") center / 450px; }
+.shaft { position: absolute; inset: 0 auto 0 50%; width: 140px; transform: translateX(-50%);
+  background: linear-gradient(90deg, #09131dda, #09131df5 30% 70%, #09131dda);
+  border-inline: 1px solid #47758440;
 }
-.art-scene .ore { position: absolute; width: 17px; height: 20px; border: 4px solid #5c9ab7; transform: rotate(30deg); }
-.art-scene .ore.a { top: 28%; left: 13%; }.art-scene .ore.b { top: 52%; right: 15%; border-color: #cf85d8; }
-.art-scene .ore.c { bottom: 16%; left: 16%; border-color: #d1a96a; }
-.shaft { position: absolute; inset: 0 auto 0 34%; width: 32%; background: #0a1220; box-shadow: 0 0 0 7px #070c16a9, inset 12px 0 22px #0007, inset -12px 0 22px #0007; }
-.shaft:after { content: ""; position: absolute; inset: 0; opacity: .16; background: repeating-linear-gradient(to bottom, #c4f9fa 0 3px, transparent 3px 49px); }
-.drill-illustration {
-  width: 114px; position: absolute; top: 24%; left: 50%; z-index: 2; transform: translateX(-50%);
-  filter: drop-shadow(0 10px 18px #000b);
-  animation: drill-idle 2.8s ease-in-out infinite;
+.home-drill { width: 150px; height: auto; position: absolute; top: 23%; left: 50%; z-index: 2;
+  transform: translateX(-50%); filter: drop-shadow(0 8px 12px #0006);
 }
-.drill-body { height: 113px; border: 5px solid #162b3b; border-radius: 14px 14px 9px 9px; background: linear-gradient(90deg, #2a9eb1, #9ff9e7 28%, #52b9c7 71%, #25738d); position: relative; }
-.drill-body:before { content: ""; position: absolute; top: 16px; left: 18%; width: 64%; height: 36px; border-radius: 6px; background: #10253c; border: 3px solid #294b63; box-shadow: inset 0 0 14px #00e5d75c; }
-.drill-body:after { content: ""; position: absolute; top: 70px; left: 22%; width: 56%; height: 9px; border-radius: 3px; background: #e5db8f; }
-.drill-wing { position: absolute; top: 33px; width: 20px; height: 65px; background: #2f6679; border: 4px solid #183c51; }
-.drill-wing.left { right: 100%; border-radius: 9px 0 0 7px; }.drill-wing.right { left: 100%; border-radius: 0 9px 7px 0; }
-.drill-bit { margin: -1px auto 0; width: 74px; height: 80px; clip-path: polygon(0 0,100% 0,87% 32%,68% 65%,50% 100%,32% 65%,13% 32%); background: repeating-linear-gradient(145deg, #a8c0c8 0 15px, #547f93 16px 24px, #d4e1d0 25px 28px); border-bottom: 5px solid #e6d6a0; }
-.beam { position: absolute; width: 16px; height: 130px; bottom: -67px; left: 50%; transform: translateX(-50%); background: linear-gradient(#90fef160, transparent); filter: blur(8px); }
 .art-label { position: absolute; z-index: 2; top: 22px; left: 22px; font-size: 11px; color: #bfd6e6; letter-spacing: .18em; font-weight: 800; }
 .art-distance { position: absolute; z-index: 2; bottom: 22px; right: 22px; padding: 9px 14px; border: 1px solid #8fe7d063; border-radius: 5px; background: #0d1d2bdb; color: #83e6d6; font-family: ui-monospace, monospace; font-weight: 900; }
 .tier-section { border-top: 1px solid #2a4355; margin-top: 30px; padding-top: 25px; }
@@ -128,9 +114,10 @@ h1, h2, h3, p { margin-top: 0; }
 .stats { display: flex; align-items: center; gap: 13px; }
 .stat { border: 1px solid var(--stroke); background: #121f30; padding: 10px 15px; border-radius: 7px; min-width: 114px; }
 .stat span { display: block; color: #839eaf; font-size: 10px; font-weight: 750; letter-spacing: .14em; }
+.stat strong > span { display: inline; color: inherit; font: inherit; letter-spacing: inherit; }
 .stat strong { display: block; font-size: 25px; letter-spacing: -.035em; }
 .stat strong em { font-style: normal; color: #a1b8c6; font-size: 13px; }
-.game-grid { display: grid; grid-template-columns: minmax(0, 1fr) 330px; gap: 22px; align-items: stretch; }
+.game-grid { display: flex; flex-direction: column; gap: 14px; }
 .question-card, .shaft-card { border: 1px solid #2c4458; border-radius: 12px; background: #101d2c; overflow: hidden; }
 .question-card { padding: clamp(24px, 4vw, 39px); min-height: 545px; position: relative; }
 .progress-top { display: flex; align-items: center; justify-content: space-between; color: #8ca8ba; font-size: 11px; letter-spacing: .1em; font-weight: 800; }
@@ -163,22 +150,6 @@ h1, h2, h3, p { margin-top: 0; }
   margin-top: 18px; padding: 15px 16px; border: 1px solid #845c51;
   background: #3e29243d; border-radius: 6px; color: #f2c1ab; font-size: 13px;
 }
-.shaft-card { padding: 20px 18px; display: flex; flex-direction: column; min-height: 545px; }
-.shaft-head { display: flex; justify-content: space-between; align-items: center; font-size: 11px; font-weight: 800; letter-spacing: .15em; color: #9bb6c9; }
-.shaft-head strong { color: var(--aqua); }
-.gauge {
-  margin: 16px 0 0; min-height: 346px; border: 1px solid #395369; border-radius: 8px;
-  position: relative; flex: 1; overflow: hidden;
-  background: repeating-linear-gradient(180deg, #2b3549 0 57px, #343348 58px 114px, #312d43 115px 175px);
-}
-.gauge::before { content: ""; position: absolute; left: 50%; top: 0; bottom: 0; width: 49%; transform: translateX(-50%); background: #0b1525; border-inline: 5px solid #162233; box-shadow: 0 0 12px #0008; }
-.gauge-lines { position: absolute; inset: 0; background: repeating-linear-gradient(180deg, transparent 0 76px, #a6c3d23b 77px 78px, transparent 79px 80px); }
-.gauge-depth { position: absolute; right: 10px; top: 12px; font: 700 12px ui-monospace, monospace; background: #101d2bcf; padding: 5px 8px; border-radius: 4px; color: #b5d2e6; }
-.gauge-drill { position: absolute; z-index: 2; top: calc(24px + var(--progress, 0) * (100% - 104px)); left: 50%; width: 62px; transform: translateX(-50%); transition: top 1.15s cubic-bezier(.22,.85,.26,1); filter: drop-shadow(0 4px 10px #0009); }
-.gauge-drill:before { content: ""; display: block; height: 61px; border: 4px solid #16556a; border-radius: 10px 10px 4px 4px; background: linear-gradient(90deg, #3191a9, #91f5e7 40%, #317b95); box-shadow: inset 0 15px 0 #18546c, inset 0 31px 0 #59bdc7; }
-.gauge-drill:after { content: ""; display: block; width: 40px; height: 35px; margin: auto; clip-path: polygon(0 0,100% 0,50% 100%); background: repeating-linear-gradient(155deg, #d5e1e6 0 9px, #598da1 9px 17px); }
-.gauge-footer { padding-top: 18px; display: flex; justify-content: space-between; color: #86a0b3; font-size: 12px; }
-.gauge-footer strong { color: #d5eff5; }
 .history { margin-top: 25px; }
 .history h3 { font-size: 13px; color: #96b1c4; letter-spacing: .13em; margin-bottom: 13px; }
 .history-list { display: flex; flex-direction: column; gap: 8px; }
@@ -203,21 +174,15 @@ h1, h2, h3, p { margin-top: 0; }
 .end-actions { display: flex; justify-content: center; gap: 10px; flex-wrap: wrap; }
 .footer { border-top: 1px solid #213548; color: #66869b; font-size: 12px; padding: 25px 0 0; margin-top: 40px; display: flex; justify-content: space-between; gap: 18px; flex-wrap: wrap; }
 .footer a { color: #accbdc; }
-@keyframes drill-idle { 0%,100% { transform: translate(-50%,0) } 50% { transform: translate(-50%,7px) } }
 @keyframes deep-pop { 0% { transform: scale(.94); opacity: .3; } 65% { transform: scale(1.025); opacity: 1; } 100% { transform: scale(1); } }
 @keyframes enter { from { transform: translateY(10px); opacity: .2; } to { transform: translateY(0); opacity: 1; } }
-body.deep-hit .gauge { box-shadow: 0 0 34px #f0bb5057; }
 @media(max-width: 980px) {
-  .game-grid { grid-template-columns: minmax(0, 1fr) 260px; gap: 16px; }
   .home-grid { gap: 18px; }
   .title { font-size: clamp(68px, 9vw, 112px); }
 }
 @media(max-width: 740px) {
   .home-grid { grid-template-columns: 1fr; }
   .art-scene { display: none; }
-  .game-grid { grid-template-columns: 1fr; }
-  .shaft-card { min-height: auto; }
-  .gauge { min-height: 270px; max-height: 270px; }
   .question-card { min-height: 0; }
   .category-eyebrow { margin-top: 42px; }
   .tier-grid { grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 5px; }
@@ -243,8 +208,7 @@ body.deep-hit .gauge { box-shadow: 0 0 34px #f0bb5057; }
 }
 
 
-/* v0.2: Krillion-inspired 30-second question flow and unobtrusive drill */
-.game-grid { display: flex; flex-direction: column; gap: 14px; }
+/* Question timing and compact, score-driven excavation scene. */
 .question-card { min-height: 0; padding-bottom: 28px; }
 .category-eyebrow { margin-top: 27px; }
 .hint { margin-bottom: 24px; }
@@ -257,86 +221,112 @@ body.deep-hit .gauge { box-shadow: 0 0 34px #f0bb5057; }
 .timer-wrap.urgent .timer-fill { background: linear-gradient(90deg,#f07179,#f4ac7d); }
 .timer-wrap.paused .timer-fill { background: #76a8ba; }
 .timer-notice { margin: 7px 0 0; color: #7294a9; font-size: 11px; }
-.shaft-card { min-height: 0; padding: 14px 17px 10px; background: #0f1a29; }
-.shaft-head { font-size: 10px; letter-spacing: .12em; }
-.shaft-head strong { color: #b0e5de; }
+
+.topbar-meta { display: flex; align-items: center; gap: 18px; }
+.build-revision { color: #92b4c4; font: 11px ui-monospace, monospace; white-space: nowrap; letter-spacing: .04em; }
+.build-revision:hover { color: var(--aqua-hi); }
+.stats strong, .shaft-head strong, .gauge-depth { font-variant-numeric: tabular-nums; }
+.shaft-card { padding: 12px 16px 9px; background: #0d1926; }
+.shaft-head { display: flex; justify-content: space-between; align-items: center; gap: 12px;
+  font-size: 10px; font-weight: 750; letter-spacing: .12em; color: #7f9aaa;
+}
+.shaft-head strong { color: #a3c9cd; letter-spacing: .02em; white-space: nowrap; }
 .gauge {
-  min-height: 202px; height: 202px; max-height: 202px; flex: none;
-  margin-top: 10px; border-radius: 9px; border: 1px solid #2a3e50;
-  background: linear-gradient(180deg,#0c1826,#142235 55%,#0a1423);
-  isolation: isolate;
+  height: 166px; margin-top: 9px; border-radius: 8px; border: 1px solid #284152;
+  position: relative; overflow: hidden; isolation: isolate; contain: layout paint;
+  background: #111f30; --dig-duration: 1000ms; --dig-dip: 4px;
 }
-.gauge::before { content: none; }
-.terrain {
-  position: absolute; z-index: 0; inset: 0; height: 950px;
-  background:
-    radial-gradient(circle at 11% 18%, #7898a63a 0 4px,transparent 5px),
-    radial-gradient(circle at 86% 29%, #9d829b34 0 7px,transparent 8px),
-    radial-gradient(circle at 34% 57%, #4c98ab28 0 5px,transparent 6px),
-    radial-gradient(circle at 75% 82%, #7898a634 0 6px,transparent 7px),
-    repeating-linear-gradient(180deg,#152435 0 52px,#1b293a 53px 106px,#131f30 107px 151px);
-  background-size: 190px 190px,230px 230px,220px 220px,290px 290px,auto;
-  transition: transform 1.35s cubic-bezier(.17,.75,.2,1);
-  will-change: transform;
+.gauge::after { content: ""; position: absolute; z-index: 2; inset: 0; pointer-events: none;
+  background: linear-gradient(180deg, #08132190, transparent 28% 70%, #081321b0),
+    linear-gradient(90deg, #08132170, transparent 35% 65%, #08132170);
 }
+.terrain { position: absolute; inset: 0 0 auto; height: 1280px; opacity: .65; }
+.terrain-band { height: 320px; background: url("assets/ground.webp") center top / 320px 320px repeat-x; }
+.terrain-band:nth-child(even) { transform: scaleY(-1); }
+.gauge.is-drilling .terrain { will-change: transform; }
 .gauge-shaft {
-  position: absolute; inset: 0 auto 0 50%; transform: translateX(-50%);
-  width: 120px; background: linear-gradient(90deg, #050b16d1,#0c1524d0 30%, #07121edb 70%, #050b16d1);
-  border-left: 3px solid #35536865; border-right: 3px solid #35536865;
+  position: absolute; z-index: 1; inset: 0 auto 0 50%; transform: translateX(-50%);
+  width: 98px; background: linear-gradient(90deg, #07121ed9, #081421f5 30% 70%, #07121ed9);
+  border-inline: 1px solid #57829540; box-shadow: 0 0 15px #0003;
 }
-.gauge-depth { top: 13px; right: 15px; font-size: 14px; color: #e7f8f8; z-index: 2; }
-.gauge-drill {
-  width: 94px; left: 50%; top: 8px; z-index: 3;
-  filter: drop-shadow(0 8px 15px #0009);
-  transform: translateX(-50%);
-  transition: none;
+.gauge-depth { position: absolute; z-index: 3; right: 13px; top: 11px;
+  font: 600 12px ui-monospace, monospace; color: #bcdde1;
+  padding: 4px 7px; border-radius: 4px; background: #0a1724bd;
 }
-.gauge-drill::before,.gauge-drill::after { content: none; }
-.drill-svg { display: block; width: 94px; height: 142px; }
-.drill-trail {
-  position: absolute; top: 132px; left: 50%; transform: translateX(-50%);
-  width: 46px; height: 42px; border-radius: 0 0 40px 40px;
-  background: linear-gradient(180deg,#8eebdf38,transparent); opacity: .12;
+.gauge-drill { position: absolute; z-index: 3; left: 50%; top: 50%; width: 76px; height: 114px;
+  transform: translate(-50%, -50%); filter: drop-shadow(0 4px 5px #0007);
 }
-.gauge.is-drilling .gauge-drill { animation: cut-drill-dip 1.3s ease-out; }
-.gauge.is-drilling .drill-trail { animation: cut-trail 1.3s ease-out; }
-.scene-feedback {
-  position: absolute; z-index: 4; right: calc(50% + 87px); top: 71px;
-  color: #c3fcf0; font-size: 22px; font-weight: 900; letter-spacing: -.03em;
-  text-shadow: 0 2px 10px #000;
-  opacity: 0; pointer-events: none;
+.drill-sprite { display: block; width: 100%; height: 100%; object-fit: contain; }
+.gauge.is-drilling .gauge-drill { animation: drill-dip var(--dig-duration) ease-out both; }
+.gauge.is-drilling .drill-sprite { animation: drill-vibration 90ms linear infinite; }
+.drill-dust { position: absolute; z-index: 3; left: 50%; top: calc(50% + 39px); pointer-events: none; }
+.drill-dust i { position: absolute; width: 3px; height: 3px; border-radius: 1px; background: #87a9b6;
+  opacity: 0; --dust-x: -29px; --dust-y: -19px; --delay: 0ms;
 }
-.scene-feedback.active { animation: cut-reward-float 1.4s ease-out both; }
-.drill-caption { text-align: center; margin: 8px 0 0; color: #7796ab; font-size: 11px; }
+.drill-dust i:nth-child(2) { --dust-x: 33px; --dust-y: -23px; --delay: 90ms; }
+.drill-dust i:nth-child(3) { --dust-x: -42px; --dust-y: -8px; --delay: 180ms; width: 2px; height: 2px; }
+.drill-dust i:nth-child(4) { --dust-x: 25px; --dust-y: -11px; --delay: 270ms; }
+.drill-dust i:nth-child(5) { --dust-x: -22px; --dust-y: -29px; --delay: 360ms; width: 2px; height: 2px; }
+.drill-dust i:nth-child(6) { --dust-x: 40px; --dust-y: -18px; --delay: 450ms; }
+.gauge.is-drilling .drill-dust i { animation: drill-dust 520ms var(--delay) ease-out both; }
+.gauge.is-deep .drill-dust i { animation-iteration-count: 2; background: #a4c6cb; }
+.scene-feedback { position: absolute; z-index: 4; top: 50%; left: calc(50% + 68px);
+  transform: translateY(-50%); opacity: 0; pointer-events: none;
+}
+.scene-feedback span { display: block; font-size: 9px; font-weight: 800; letter-spacing: .1em; color: #8bb4bd; }
+.scene-feedback strong { display: block; font-size: 24px; font-weight: 850; color: #b6eee5; letter-spacing: -.04em; }
+.scene-feedback.active { animation: reward-reveal var(--dig-duration) ease-out both; }
+.gauge.is-deep .scene-feedback span { color: #efd393; }
+.gauge.is-deep .scene-feedback strong { color: #ffe4a9; }
+.drill-caption { text-align: center; margin: 6px 0 0; color: #708e9f; font-size: 10px; }
 .graded.timeout { --flash: #ffaf9b; border-color: #765251; }
+.graded { padding: 16px 20px; display: grid; grid-template-columns: minmax(0,1fr) auto; gap: 4px 16px; }
+.graded-label { font-size: 24px; }
+.graded-answer { margin: 0; overflow-wrap: anywhere; }
+.graded-points { grid-column: 2; grid-row: 1 / 3; align-self: center; margin: 0; font-size: 22px; }
+.result-actions { grid-column: 1 / -1; margin-top: 8px; }
+.result-actions .primary { padding: 10px 15px; font-size: 11px; }
+.graded.deep { box-shadow: inset 0 0 20px #ffd06708; border-color: #b29b65; }
 .form-footer { margin-top: 16px; }
-@keyframes cut-drill-dip {
-  0% { transform: translate(-50%,0); }
-  19% { transform: translate(-50%,22px); }
-  31% { transform: translate(-50%,13px); }
-  75% { transform: translate(-50%,9px); }
-  100% { transform: translate(-50%,0); }
+@keyframes drill-dip {
+  0%,100% { transform: translate(-50%, -50%); }
+  18%,45% { transform: translate(-50%, calc(-50% + var(--dig-dip))); }
 }
-@keyframes cut-trail {
-  0%,100% { opacity: .12; }
-  28%,60% { opacity: .85; }
+@keyframes drill-vibration {
+  0%,100% { transform: translate(0,0); }
+  25% { transform: translate(.65px,.4px); }
+  75% { transform: translate(-.65px,-.4px); }
 }
-@keyframes cut-reward-float {
-  0% { opacity: 0; transform: translateY(12px); }
-  20% { opacity: 1; transform: translateY(0); }
-  80% { opacity: 1; }
-  100% { opacity: 0; transform: translateY(-17px); }
+@keyframes drill-dust {
+  0% { opacity: 0; transform: translate(0,0); }
+  15% { opacity: .55; }
+  100% { opacity: 0; transform: translate(var(--dust-x), var(--dust-y)); }
+}
+@keyframes reward-reveal {
+  0% { opacity: 0; translate: 0 6px; }
+  18%,75% { opacity: 1; translate: 0 0; }
+  100% { opacity: 0; translate: 0 -5px; }
 }
 @media (max-width: 740px) {
-  .gauge { min-height: 180px; max-height: 180px; height: 180px; }
-  .shaft-card { padding: 12px; }
+  .topbar-meta { gap: 10px; }
+  .shaft-card { padding: 10px 12px 8px; }
   .category-eyebrow { margin-top: 26px; }
-  .scene-feedback { right: calc(50% + 57px); top: 65px; font-size: 17px; }
+  .progress-top { gap: 12px; flex-wrap: wrap; font-size: 10px; }
+}
+@media (max-width: 500px) {
+  .topbar { flex-wrap: wrap; gap: 10px; }
+  .build-revision { font-size: 10px; }
+  .gauge { height: 152px; }
+  .gauge-drill { width: 68px; height: 102px; }
+  .gauge-shaft { width: 86px; }
+  .scene-feedback { left: calc(50% + 50px); }
+  .scene-feedback span { font-size: 8px; letter-spacing: .02em; }
+  .scene-feedback strong { font-size: 21px; }
+  .graded { padding: 14px; gap: 4px 10px; }
+  .graded-label { font-size: 21px; }
+  .graded-points { font-size: 16px; }
+  .form-footer { flex-wrap: wrap; gap: 4px; }
 }
 @media (prefers-reduced-motion: reduce) {
-  .gauge.is-drilling .gauge-drill,
-  .gauge.is-drilling .drill-trail,
-  .scene-feedback.active { animation: none !important; }
   .scene-feedback.active { opacity: 1; }
-  .terrain { transition: none !important; }
 }
