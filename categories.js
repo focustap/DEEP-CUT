@@ -295,7 +295,8 @@ window.DEEP_CUT_DATA = [
         "Dragon Fruit~Pitaya",
         "Coconut",
         "Lychee",
-        "Fig"
+        "Fig",
+        "Tomato"
       ],
       [
         "Rambutan",
