@@ -87,14 +87,33 @@
             <span id="roundHint" class="tiny-tip">10 questions · 30 seconds each</span>
           </div>
         </div>
-        <aside class="shaft-card" aria-label="Drilling progress">
-          <div class="shaft-head"><span>DRILL STATUS</span><strong>● ONLINE</strong></div>
+        <section class="shaft-card" aria-label="Drill progress animation">
+          <div class="shaft-head"><span>BELOW THE SURFACE</span><strong id="shaftTotal">0 / 2,000 m</strong></div>
           <div class="gauge" id="gauge">
-            <div class="gauge-lines"></div><span class="gauge-depth" id="gaugeNumber">0 m</span>
-            <div id="gaugeDrill" class="gauge-drill" aria-hidden="true"></div>
+            <div class="terrain" id="terrain" aria-hidden="true"></div>
+            <div class="gauge-shaft" aria-hidden="true"></div>
+            <div class="gauge-drill" id="gaugeDrill" aria-hidden="true">
+              <svg class="drill-svg" viewBox="0 0 120 156" xmlns="http://www.w3.org/2000/svg">
+                <defs>
+                  <linearGradient id="drill-metal" x1="0" x2="1"><stop stop-color="#1c647d"/><stop offset=".32" stop-color="#83d3db"/><stop offset=".65" stop-color="#367f99"/><stop offset="1" stop-color="#184e6c"/></linearGradient>
+                  <linearGradient id="drill-bit" x1="0" x2="1"><stop stop-color="#688499"/><stop offset=".5" stop-color="#d3e2e6"/><stop offset="1" stop-color="#5f849a"/></linearGradient>
+                </defs>
+                <path d="M60 4V17" stroke="#7bd1dd" stroke-width="7" stroke-linecap="round"/>
+                <path d="M19 51L31 44V104L19 99ZM101 51L89 44V104L101 99Z" fill="#254c65" stroke="#639eb1" stroke-width="2"/>
+                <rect x="31" y="17" width="58" height="96" rx="17" fill="url(#drill-metal)" stroke="#173d55" stroke-width="4"/>
+                <rect x="39" y="36" width="42" height="30" rx="8" fill="#0c2d3f" stroke="#92d2db" stroke-width="2.5"/>
+                <path d="M45 75H75M45 85H75M45 95H75" stroke="#c5f0e3" stroke-width="3" opacity=".65"/>
+                <path d="M38 111L60 153L82 111Z" fill="url(#drill-bit)" stroke="#294e65" stroke-width="3"/>
+                <path d="M47 126L73 126M53 137L67 137" stroke="#467488" stroke-width="3"/>
+                <circle cx="60" cy="50" r="6" fill="#70f4e2"/>
+              </svg>
+              <div class="drill-trail"></div>
+            </div>
+            <div class="gauge-depth" id="gaugeNumber">0 m</div>
+            <div class="scene-feedback" id="sceneFeedback" aria-hidden="true"></div>
           </div>
-          <div class="gauge-footer"><span>CURRENT DEPTH</span><strong id="shaftTotal">0 / 2,000 m</strong></div>
-        </aside>
+          <p class="drill-caption">One valid answer. One deeper dig.</p>
+        </section>
       </div>
       <section class="history" aria-label="Answers submitted">
         <h3>YOUR DIG LOG</h3>
