@@ -69,6 +69,7 @@
   let round = 0;
   let depth = 0;
   let submitted = false;
+  let checking = false;
   let history = [];
   let deepCuts = 0;
 
@@ -134,6 +135,8 @@
     const category = deck[round];
     if (!category) { finishRun(); return; }
     submitted = false;
+    checking = false;
+    $("submitBtn").textContent = "LOCK IN →";
     $("prompt").textContent = category.prompt;
     $("categoryNote").textContent = category.note;
     $("roundDisplay").textContent = "QUESTION " + String(round + 1).padStart(2, "0") + " / " + TOTAL_ROUNDS;
@@ -161,6 +164,7 @@
     depth = 0;
     deepCuts = 0;
     submitted = false;
+    checking = false;
     history = [];
     updateBest();
     renderHistory();
@@ -194,26 +198,68 @@
     $("nextBtn").focus();
   }
 
-  function submitAnswer(event) {
+  async function submitAnswer(event) {
     event.preventDefault();
-    if (submitted) return;
+    if (submitted || checking) return;
     const raw = $("answer").value.trim();
     if (!raw) return;
     const category = deck[round];
     if (!category) return;
+
     const match = indices.get(category.id).get(norm(raw));
-    if (!match) {
-      // An incomplete answer bank must never be presented as proof that an answer is invalid.
-      $("unknownBox").hidden = false;
-      $("answer").focus();
-      $("answer").select();
+    if (match) {
+      showGrade(match);
       return;
     }
-    showGrade(match);
+
+    const endpoint = String(window.DEEP_CUT_GRADING_URL || "").trim();
+    if (!endpoint) {
+      $("unknownBox").textContent = "This answer isn't in our offline dictionary yet. AI grading hasn't been connected. Try another answer or skip.";
+      $("unknownBox").hidden = false;
+      $("answer").focus();
+      return;
+    }
+
+    checking = true;
+    $("unknownBox").hidden = true;
+    $("answer").disabled = true;
+    $("submitBtn").disabled = true;
+    $("skipBtn").disabled = true;
+    $("submitBtn").textContent = "CHECKING...";
+    try {
+      const response = await fetch(endpoint, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ categoryId: category.id, answer: raw })
+      });
+      const result = await response.json();
+      if (result.status === "accepted" && Number.isInteger(result.tierIndex) &&
+          result.tierIndex >= 0 && result.tierIndex < TIERS.length &&
+          typeof result.canonical === "string" && result.canonical.trim()) {
+        showGrade({ canonical: result.canonical.slice(0, 100), tierIndex: result.tierIndex });
+      } else {
+        $("unknownBox").textContent = typeof result.message === "string"
+          ? result.message
+          : "We couldn't verify that answer. Try another one or skip.";
+        $("unknownBox").hidden = false;
+      }
+    } catch (_) {
+      $("unknownBox").textContent = "Couldn't reach the AI judge. Try again or use a known answer.";
+      $("unknownBox").hidden = false;
+    } finally {
+      checking = false;
+      $("submitBtn").textContent = "LOCK IN →";
+      if (!submitted) {
+        $("answer").disabled = false;
+        $("submitBtn").disabled = false;
+        $("skipBtn").disabled = false;
+        $("answer").focus();
+      }
+    }
   }
 
   function skipQuestion() {
-    if (submitted) return;
+    if (submitted || checking) return;
     submitted = true;
     history.push({ number: round + 1, answer: deck[round].prompt + " — skipped", tier: null });
     renderHistory();
