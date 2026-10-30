@@ -241,3 +241,102 @@ body.deep-hit .gauge { box-shadow: 0 0 34px #f0bb5057; }
 @media(prefers-reduced-motion: reduce) {
   *,*:before,*:after { animation: none !important; transition: none !important; }
 }
+
+
+/* v0.2: Krillion-inspired 30-second question flow and unobtrusive drill */
+.game-grid { display: flex; flex-direction: column; gap: 14px; }
+.question-card { min-height: 0; padding-bottom: 28px; }
+.category-eyebrow { margin-top: 27px; }
+.hint { margin-bottom: 24px; }
+.timer-wrap { margin-top: 20px; }
+.timer-header { display: flex; justify-content: space-between; align-items: center; color: #93b1c3; font-size: 11px; font-weight: 850; letter-spacing: .13em; }
+.timer-header strong { font-size: 24px; font-variant-numeric: tabular-nums; color: #b0f4ed; letter-spacing: -.045em; }
+.timer-track { margin-top: 7px; height: 8px; overflow: hidden; background: #24394a; border-radius: 99px; }
+.timer-fill { width: 100%; height: 100%; background: linear-gradient(90deg,#4dbacb,#9af0dd); border-radius: inherit; transition: width .09s linear,background .2s; }
+.timer-wrap.urgent .timer-header strong { color: #ffb4a9; }
+.timer-wrap.urgent .timer-fill { background: linear-gradient(90deg,#f07179,#f4ac7d); }
+.timer-wrap.paused .timer-fill { background: #76a8ba; }
+.timer-notice { margin: 7px 0 0; color: #7294a9; font-size: 11px; }
+.shaft-card { min-height: 0; padding: 14px 17px 10px; background: #0f1a29; }
+.shaft-head { font-size: 10px; letter-spacing: .12em; }
+.shaft-head strong { color: #b0e5de; }
+.gauge {
+  min-height: 202px; height: 202px; max-height: 202px; flex: none;
+  margin-top: 10px; border-radius: 9px; border: 1px solid #2a3e50;
+  background: linear-gradient(180deg,#0c1826,#142235 55%,#0a1423);
+  isolation: isolate;
+}
+.gauge::before { content: none; }
+.terrain {
+  position: absolute; z-index: 0; inset: 0; height: 950px;
+  background:
+    radial-gradient(circle at 11% 18%, #7898a63a 0 4px,transparent 5px),
+    radial-gradient(circle at 86% 29%, #9d829b34 0 7px,transparent 8px),
+    radial-gradient(circle at 34% 57%, #4c98ab28 0 5px,transparent 6px),
+    radial-gradient(circle at 75% 82%, #7898a634 0 6px,transparent 7px),
+    repeating-linear-gradient(180deg,#152435 0 52px,#1b293a 53px 106px,#131f30 107px 151px);
+  background-size: 190px 190px,230px 230px,220px 220px,290px 290px,auto;
+  transition: transform 1.35s cubic-bezier(.17,.75,.2,1);
+  will-change: transform;
+}
+.gauge-shaft {
+  position: absolute; inset: 0 auto 0 50%; transform: translateX(-50%);
+  width: 120px; background: linear-gradient(90deg, #050b16d1,#0c1524d0 30%, #07121edb 70%, #050b16d1);
+  border-left: 3px solid #35536865; border-right: 3px solid #35536865;
+}
+.gauge-depth { top: 13px; right: 15px; font-size: 14px; color: #e7f8f8; z-index: 2; }
+.gauge-drill {
+  width: 94px; left: 50%; top: 8px; z-index: 3;
+  filter: drop-shadow(0 8px 15px #0009);
+  transform: translateX(-50%);
+  transition: none;
+}
+.gauge-drill::before,.gauge-drill::after { content: none; }
+.drill-svg { display: block; width: 94px; height: 142px; }
+.drill-trail {
+  position: absolute; top: 132px; left: 50%; transform: translateX(-50%);
+  width: 46px; height: 42px; border-radius: 0 0 40px 40px;
+  background: linear-gradient(180deg,#8eebdf38,transparent); opacity: .12;
+}
+.gauge.is-drilling .gauge-drill { animation: cut-drill-dip 1.3s ease-out; }
+.gauge.is-drilling .drill-trail { animation: cut-trail 1.3s ease-out; }
+.scene-feedback {
+  position: absolute; z-index: 4; right: calc(50% + 87px); top: 71px;
+  color: #c3fcf0; font-size: 22px; font-weight: 900; letter-spacing: -.03em;
+  text-shadow: 0 2px 10px #000;
+  opacity: 0; pointer-events: none;
+}
+.scene-feedback.active { animation: cut-reward-float 1.4s ease-out both; }
+.drill-caption { text-align: center; margin: 8px 0 0; color: #7796ab; font-size: 11px; }
+.graded.timeout { --flash: #ffaf9b; border-color: #765251; }
+.form-footer { margin-top: 16px; }
+@keyframes cut-drill-dip {
+  0% { transform: translate(-50%,0); }
+  19% { transform: translate(-50%,22px); }
+  31% { transform: translate(-50%,13px); }
+  75% { transform: translate(-50%,9px); }
+  100% { transform: translate(-50%,0); }
+}
+@keyframes cut-trail {
+  0%,100% { opacity: .12; }
+  28%,60% { opacity: .85; }
+}
+@keyframes cut-reward-float {
+  0% { opacity: 0; transform: translateY(12px); }
+  20% { opacity: 1; transform: translateY(0); }
+  80% { opacity: 1; }
+  100% { opacity: 0; transform: translateY(-17px); }
+}
+@media (max-width: 740px) {
+  .gauge { min-height: 180px; max-height: 180px; height: 180px; }
+  .shaft-card { padding: 12px; }
+  .category-eyebrow { margin-top: 26px; }
+  .scene-feedback { right: calc(50% + 57px); top: 65px; font-size: 17px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .gauge.is-drilling .gauge-drill,
+  .gauge.is-drilling .drill-trail,
+  .scene-feedback.active { animation: none !important; }
+  .scene-feedback.active { opacity: 1; }
+  .terrain { transition: none !important; }
+}
