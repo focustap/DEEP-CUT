@@ -6,11 +6,14 @@
 // and unknown / low-confidence AI judgments do not award any score.
 import { createClient } from "npm:@supabase/supabase-js@2.112.3";
 
-const ALLOWED_ORIGIN = "https://focustap.github.io";
+// Anonymous, read-only-to-client grading endpoint. The database quota protects
+// the paid upstream API; CORS is not authentication and should not break local
+// previews or alternative BenGames hosting origins.
 const HEADERS = {
-  "Access-Control-Allow-Origin": ALLOWED_ORIGIN,
+  "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Methods": "POST, OPTIONS",
-  "Access-Control-Allow-Headers": "content-type",
+  "Access-Control-Allow-Headers": "content-type, authorization, apikey, x-client-info",
+  "Access-Control-Max-Age": "86400",
   "Content-Type": "application/json; charset=utf-8",
   "Cache-Control": "no-store",
 };
@@ -142,10 +145,6 @@ async function gradeWithLuna(category: string, answer: string, key: string): Pro
 Deno.serve(async (req: Request) => {
   if (req.method === "OPTIONS") return new Response(null, { status: 204, headers: HEADERS });
   if (req.method !== "POST") return json({ status: "error", message: "Use POST." }, 405);
-  const origin = req.headers.get("origin");
-  if (origin && origin !== ALLOWED_ORIGIN) {
-    return json({ status: "error", message: "Unsupported origin." }, 403);
-  }
   if (Number(req.headers.get("content-length") || 0) > 2048) {
     return json({ status: "error", message: "Request too large." }, 413);
   }
