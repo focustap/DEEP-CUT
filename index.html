@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#080e18">
+  <meta name="description" content="How deep does your knowledge go? Think of the most obscure answer and drill as deep as possible in DEEP CUT.">
+  <title>DEEP CUT — How deep does your knowledge go?</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="backdrop-grid" aria-hidden="true"></div>
+  <header class="topbar">
+    <a href="https://focustap.github.io/BenGames/" class="backlink"><span class="back-arrow" aria-hidden="true">←</span> BACK TO BENGAMES</a>
+    <div class="mini-brand" aria-label="Deep Cut">DEEP <span>CUT</span></div>
+    <span class="save-tag">SINGLE PLAYER · LOCAL SAVES</span>
+  </header>
+  <main class="container">
+    <section id="startScreen" aria-label="Start Deep Cut">
+      <div class="home-grid">
+        <div class="home-copy">
+          <div class="eyebrow">The obscure-answer challenge</div>
+          <h1 class="title"><span>DEEP</span><span class="cut">CUT.</span></h1>
+          <h2 class="tagline">How deep does your knowledge go?</h2>
+          <p class="intro-copy">You get a category. You think of an answer. The more obscure it is, the deeper your drill goes. Ten questions. Five rarity tiers. One chance to show off that weird thing you know.</p>
+          <div class="intro-actions">
+            <button class="primary" id="startBtn" type="button">START DIGGING &nbsp; ↗</button>
+            <div class="best-pill">★ PERSONAL BEST <strong id="homeBest">0 m</strong></div>
+          </div>
+        </div>
+        <div class="art-scene" aria-hidden="true">
+          <div class="stone-lines"></div><div class="shaft"></div>
+          <i class="ore a"></i><i class="ore b"></i><i class="ore c"></i>
+          <span class="art-label">SUBSURFACE SCAN / 001</span>
+          <div class="drill-illustration">
+            <div class="drill-wing left"></div><div class="drill-wing right"></div>
+            <div class="drill-body"></div><div class="drill-bit"></div><div class="beam"></div>
+          </div>
+          <span class="art-distance">↓ +200 m</span>
+        </div>
+      </div>
+      <div class="tier-section">
+        <h2 class="small-heading">FIVE WAYS TO GO DEEPER</h2>
+        <div class="tier-grid" aria-label="Answer rarity points">
+          <div class="tier" style="--tier-color:var(--common)"><span class="tier-name">COMMON</span><span class="tier-points">+10 <small>m</small></span></div>
+          <div class="tier" style="--tier-color:var(--uncommon)"><span class="tier-name">UNCOMMON</span><span class="tier-points">+20 <small>m</small></span></div>
+          <div class="tier" style="--tier-color:var(--rare)"><span class="tier-name">RARE</span><span class="tier-points">+50 <small>m</small></span></div>
+          <div class="tier" style="--tier-color:var(--epic)"><span class="tier-name">EPIC</span><span class="tier-points">+100 <small>m</small></span></div>
+          <div class="tier" style="--tier-color:var(--deep)"><span class="tier-name">DEEP CUT!</span><span class="tier-points">+200 <small>m</small></span></div>
+        </div>
+      </div>
+    </section>
+    <section id="gameScreen" hidden aria-label="Deep Cut game">
+      <div class="game-head">
+        <div><span class="eyebrow">The knowledge excavation</span><h1>Keep digging.</h1></div>
+        <div class="stats">
+          <div class="stat"><span>TOTAL DEPTH</span><strong><span id="score">0</span> <em>m</em></strong></div>
+          <div class="stat"><span>BEST DEPTH</span><strong><span id="gameBest">0</span> <em>m</em></strong></div>
+        </div>
+      </div>
+      <div class="game-grid">
+        <div class="question-card">
+          <div class="progress-top"><span id="roundDisplay">QUESTION 01 / 10</span><span>ONE ANSWER PER ROUND</span></div>
+          <div id="segments" class="segment-track" aria-label="Round progress"></div>
+          <div class="category-eyebrow">YOUR CATEGORY</div>
+          <h2 class="prompt" id="prompt">Name a video game</h2>
+          <p id="categoryNote" class="hint">Any officially released video game.</p>
+          <form id="answerForm" class="answer-form">
+            <input id="answer" class="answer-input" name="answer" type="text" autocomplete="off" autocapitalize="sentences" spellcheck="false" maxlength="100" placeholder="Think of something obscure..." required aria-label="Your answer">
+            <button type="submit" id="submitBtn" class="primary">LOCK IN →</button>
+          </form>
+          <div class="tiny-tip">Rare answers score higher. Correct answers missing from this early-access dictionary may not be recognized yet.</div>
+          <div id="unknownBox" class="unknown" role="status" hidden>We don't recognize that one yet. That doesn't mean it's wrong — our starter dictionary is still growing. Try another answer or skip.</div>
+          <div id="resultBox" class="graded" role="status" aria-live="polite" hidden>
+            <div id="rarityName" class="graded-label"></div>
+            <div id="acceptedName" class="graded-answer"></div>
+            <div id="earnedPoints" class="graded-points"></div>
+            <div class="result-actions"><button class="primary" type="button" id="nextBtn">NEXT QUESTION →</button></div>
+          </div>
+          <div class="form-footer">
+            <button class="ghost" type="button" id="skipBtn">Skip this question ↗</button>
+            <span id="roundHint" class="tiny-tip">10 questions per run</span>
+          </div>
+        </div>
+        <aside class="shaft-card" aria-label="Drilling progress">
+          <div class="shaft-head"><span>DRILL STATUS</span><strong>● ONLINE</strong></div>
+          <div class="gauge" id="gauge">
+            <div class="gauge-lines"></div><span class="gauge-depth" id="gaugeNumber">0 m</span>
+            <div id="gaugeDrill" class="gauge-drill" aria-hidden="true"></div>
+          </div>
+          <div class="gauge-footer"><span>CURRENT DEPTH</span><strong id="shaftTotal">0 / 2,000 m</strong></div>
+        </aside>
+      </div>
+      <section class="history" aria-label="Answers submitted">
+        <h3>YOUR DIG LOG</h3>
+        <div id="historyList" class="history-list"><p class="history-empty">Answers will appear here as you dig.</p></div>
+      </section>
+    </section>
+    <section id="endScreen" hidden aria-label="End of game">
+      <div class="end-card">
+        <div class="end-icon" aria-hidden="true">✦</div>
+        <span class="eyebrow">Dig complete</span>
+        <h1>THAT'S A<br>WRAP.</h1>
+        <div id="endScore" class="end-score">0</div>
+        <div class="end-unit">METERS DEEP</div>
+        <p id="endSummary" class="end-summary">Ten questions down. How many deep cuts did you find?</p>
+        <div class="end-stats"><span>★ BEST: <b id="endBest">0 m</b></span><span>DEEP CUTS: <b id="endCuts">0</b></span><span>ANSWERED: <b id="endAnswered">0 / 10</b></span></div>
+        <div class="end-actions">
+          <button id="againBtn" class="primary" type="button">DIG AGAIN ↗</button>
+          <button id="homeBtn" class="secondary" type="button">MAIN MENU</button>
+        </div>
+      </div>
+    </section>
+    <footer class="footer">
+      <span>DEEP CUT · A BENGAMES ORIGINAL · SINGLE PLAYER</span>
+      <span>Offline starter dictionary · 16 categories · <a href="https://github.com/focustap/DEEP-CUT" target="_blank" rel="noopener noreferrer">View on GitHub</a></span>
+    </footer>
+  </main>
+  <script src="categories.js"></script>
+  <script src="game.js"></script>
+</body>
+</html>
