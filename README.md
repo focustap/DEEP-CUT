@@ -2,7 +2,7 @@
 
 **How deep does your knowledge go?**
 
-DEEP CUT is a free, single-player browser game where you answer category prompts with the most obscure valid answer you can think of. Your drill goes deeper with every answer.
+DEEP CUT is a free, single-player browser game where you answer category prompts with the most obscure valid answer you can think of. Every question has a **30-second countdown**. Try as many invalid guesses as you can in that time; the first accepted answer locks in a score and makes your drill go deeper. The timer pauses during AI validation to avoid penalizing server latency. Accepted answers animate the drill and automatically advance after a brief result reveal. Timed-out questions earn zero.
 
 | Tier | Points |
 | --- | ---: |
@@ -12,7 +12,7 @@ DEEP CUT is a free, single-player browser game where you answer category prompts
 | Epic | +100 m |
 | **DEEP CUT!** | **+200 m** |
 
-No account, backend, or multiplayer required. Best depth is saved locally on your device.
+The basic version works without signing in. Best depth is saved locally on your device; the optional AI judge uses a server-side backend. There is no multiplayer.
 
 ## Playing locally
 
