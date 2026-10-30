@@ -380,7 +380,8 @@
     try {
       const response = await fetch(endpoint, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        // A simple content-type avoids browser preflight. Backend still validates JSON.
+        headers: { "Content-Type": "text/plain;charset=UTF-8" },
         body: JSON.stringify({ categoryId: category.id, answer: raw })
       });
       const result = await response.json();
@@ -398,8 +399,9 @@
         $("unknownBox").hidden = false;
         $("answer").value = "";
       }
-    } catch (_) {
-      $("unknownBox").textContent = "Couldn't reach the AI judge. Try again or use a known answer.";
+    } catch (error) {
+      console.warn("DEEP CUT grading network error:", error);
+      $("unknownBox").textContent = "Could not contact the grading server. Your answer wasn't judged — try again or use a known answer.";
       $("unknownBox").hidden = false;
     } finally {
       checking = false;
