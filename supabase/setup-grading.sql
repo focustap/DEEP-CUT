@@ -8,6 +8,10 @@ create table if not exists public.deepcut_grade_cache (
   created_at timestamptz not null default now(),
   primary key (category_id, answer_key)
 );
+-- Bump this column when the rarity rubric changes so old AI judgments
+-- are recalculated instead of silently reused.
+alter table public.deepcut_grade_cache
+  add column if not exists grading_version smallint not null default 1;
 alter table public.deepcut_grade_cache enable row level security;
 revoke all on public.deepcut_grade_cache from anon, authenticated;
 grant select, insert, update on public.deepcut_grade_cache to service_role;
