@@ -706,6 +706,7 @@ window.DEEP_CUT_DATA = [
         "Foxglove",
         "Protea",
         "Hellebore",
+        "Cannabis~Canabis",
         "Anemone",
         "Ranunculus",
         "Freesia",
