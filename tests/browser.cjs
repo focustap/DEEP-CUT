@@ -10,7 +10,7 @@ const server = http.createServer((req, res) => {
   if (!file.startsWith(root + path.sep)) { res.writeHead(403).end(); return; }
   fs.readFile(file, (error, data) => {
     if (error) { res.writeHead(404).end(); return; }
-    const mime = { ".html": "text/html", ".css": "text/css", ".js": "text/javascript", ".webp": "image/webp" };
+    const mime = { ".html": "text/html", ".css": "text/css", ".js": "text/javascript", ".webp": "image/webp", ".png": "image/png" };
     res.setHeader("Content-Type", mime[path.extname(file)] || "text/plain");
     res.end(data);
   });
@@ -29,6 +29,12 @@ const server = http.createServer((req, res) => {
     }));
     await page.goto(`http://127.0.0.1:${server.address().port}`);
     fs.mkdirSync(path.join(root, "test-output"), { recursive: true });
+    assert(await page.locator(".home-drill").evaluate(async img => {
+      await img.decode();
+      const canvas = document.createElement("canvas"); canvas.width = img.naturalWidth; canvas.height = img.naturalHeight;
+      const ctx = canvas.getContext("2d"); ctx.drawImage(img, 0, 0);
+      return [[0,0],[255,0],[0,383],[255,383],[10,180]].every(([x,y]) => ctx.getImageData(x,y,1,1).data[3] === 0);
+    }), "PNG has genuine transparent pixels outside the drill");
     await page.screenshot({ path: path.join(root, "test-output/home.png"), fullPage: true });
     assert.equal(await page.locator("#buildRevision").textContent(), "COMMIT a6c56ae");
     assert.equal(await page.locator("#buildRevision").getAttribute("href"), `https://github.com/focustap/DEEP-CUT/commit/${revision}`);
@@ -52,6 +58,11 @@ const server = http.createServer((req, res) => {
       const question = await page.locator(".question-card").boundingBox();
       const drill = await page.locator("#gaugeDrill").boundingBox();
       assert(drill.y >= question.y + question.height, "drill below question");
+      const world = await page.locator("#excavationWorld").boundingBox();
+      const viewport = page.viewportSize();
+      assert.deepEqual(world, { x: 0, y: 0, width: viewport.width, height: viewport.height }, "ground fills viewport");
+      assert.equal(await page.locator(".gauge").evaluate(el => getComputedStyle(el).backgroundColor), "rgba(0, 0, 0, 0)", "no drill panel");
+      assert.equal(await page.locator(".gauge-drill").evaluate(el => getComputedStyle(el).backgroundColor), "rgba(0, 0, 0, 0)", "no sprite backdrop");
       assert(Math.abs(drill.x + drill.width / 2 - (question.x + question.width / 2)) < 2, "drill centered");
       assert(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), "no horizontal overflow");
       assert(await page.locator(".question-card").evaluate(el => parseFloat(getComputedStyle(el).paddingLeft) >= 16), "question card retains spacing");
@@ -61,18 +72,22 @@ const server = http.createServer((req, res) => {
     for (const [tier, points] of [10, 20, 50, 100, 200].entries()) {
       await answer(await answerFor(tier));
       await page.clock.runFor(200);
+      const nextButton = await page.locator("#nextBtn").boundingBox();
+      const earned = await page.locator("#earnedPoints").boundingBox();
+      assert(nextButton.y >= earned.y + earned.height, "next button stays clear of reward text");
       const partial = await readScene();
       assert(partial.score > depth && partial.score < depth + points, "counter interpolates");
       assert.equal(partial.score, partial.number);
       assert.equal(partial.score, partial.total);
-      assert(Math.abs(partial.offset - partial.score * 1.1) < 1, "ground follows counter");
+      const offsetError = Math.abs(partial.offset - ((partial.score * 2.4) % 640));
+      assert(Math.min(offsetError, Math.abs(640 - offsetError)) <= 1.3, "ground follows counter");
       if (points === 200) {
         await page.locator("#gauge").screenshot({ path: path.join(root, "test-output/deep-cut.png") });
       }
       depth += points;
-      await page.clock.runFor(1400);
+      await page.clock.runFor(1800);
       assert.equal((await readScene()).score, depth);
-      await page.clock.runFor(700);
+      await page.clock.runFor(300);
       assert.equal(await page.locator("#timeLeft").textContent(), "0:30");
     }
     // More than one invalid answer is retryable, with no depth award.
@@ -115,14 +130,18 @@ const server = http.createServer((req, res) => {
     await page.click("#nextBtn");
     await answer(await answerFor(4));
     depth += 400;
-    await page.clock.runFor(1600);
+    await page.clock.runFor(1900);
     assert.equal((await readScene()).score, depth, "rapid advances preserve all awarded depth");
-    assert(Math.abs((await readScene()).offset - ((depth * 1.1) % 640)) < .1, "texture wraps");
-    await page.clock.runFor(700);
+    assert(Math.abs((await readScene()).offset - ((depth * 2.4) % 640)) < .1, "texture wraps");
+    await page.clock.runFor(300);
     fs.mkdirSync(path.join(root, "test-output"), { recursive: true });
     for (const width of [1280, 768, 390, 320]) {
-      await page.setViewportSize({ width, height: 1000 });
+      await page.setViewportSize({ width, height: width <= 390 ? 844 : 1000 });
       await inLayout();
+      if (width <= 390) {
+        const box = await page.locator("#gaugeDrill").boundingBox();
+        assert(box.y + box.height < 844, "mobile drill stays visible below question");
+      }
       await page.screenshot({ path: path.join(root, `test-output/game-${width}.png`), fullPage: true });
     }
     await page.click("#skipBtn");
@@ -144,7 +163,7 @@ const server = http.createServer((req, res) => {
     assert.equal(await page.locator("#endBest").textContent(), "2,000 m");
     assert.equal(await page.locator("#endCuts").textContent(), "10");
     assert.deepEqual(errors, []);
-    console.log("PASS: five tiers, synchronized descent, retry/AI clock flow, timeout, rapid advance, wrapping, responsive layout, reduced motion, replay.");
+    console.log("PASS: full-screen terrain, transparent sprite, five tiers, synchronized descent, retry/AI clock flow, timeout, rapid advance, wrapping, responsive layout, reduced motion, replay.");
   } finally {
     await browser.close();
   }

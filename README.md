@@ -20,7 +20,7 @@ Open `index.html` in a browser once the game files are installed. You can also p
 
 ### Drill presentation and verification
 
-The drill sits beneath the question. A single animation timeline moves the ground upward and updates all depth counters together. Awards scale the distance and duration; +200 m gets a slightly stronger dip and dust burst. Animations stop when idle or the tab is hidden. Reduced-motion mode updates depth immediately without vibration, dust, or scrolling.
+The underground background fills the viewport behind a centered trivia window. A transparent drill sits directly below the question with no enclosing panel or shaft. A single animation timeline scrolls the entire ground upward and updates all depth counters together. Awards scale the distance and duration; +200 m gets a longer descent, stronger dip, turning auger, and dust burst. Animations stop when idle or the tab is hidden. Reduced-motion mode updates depth immediately without vibration, dust, or scrolling. The dig log can be expanded below the drill.
 
 The Pages workflow stamps the deployed Git commit into `revision.js`. The top bar links that short ID to its GitHub commit; local previews show `COMMIT dev`.
 

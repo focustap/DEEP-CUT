@@ -132,6 +132,7 @@
     if (sceneFrame !== null) cancelAnimationFrame(sceneFrame);
     sceneFrame = null;
     $("gauge").classList.remove("is-drilling", "is-deep");
+    $("excavationWorld").classList.remove("is-drilling", "is-deep");
     $("sceneFeedback").classList.remove("active");
   }
 
@@ -150,7 +151,7 @@
     // remains immediate; presentation catches up before automatic progression.
     const from = displayedDepth;
     const target = depth;
-    const duration = 650 + Math.sqrt(points / 200) * 850;
+    const duration = 800 + Math.sqrt(points / 200) * 1000;
     scene.style.setProperty("--dig-duration", duration + "ms");
     scene.style.setProperty("--dig-dip", (3 + points / 40) + "px");
     void scene.offsetWidth;
@@ -161,6 +162,8 @@
       return;
     }
     scene.classList.add("is-drilling");
+    $("excavationWorld").classList.add("is-drilling");
+    $("excavationWorld").classList.toggle("is-deep", points === 200);
     const started = performance.now();
     function frame(now) {
       const progress = Math.min(1, (now - started) / duration);
@@ -181,6 +184,7 @@
 
   function switchScreen(screen) {
     [startScreen, gameScreen, endScreen].forEach((item) => { item.hidden = item !== screen; });
+    document.body.classList.toggle("is-playing", screen === gameScreen);
     window.scrollTo({ top: 0, behavior: "instant" });
   }
 
@@ -197,7 +201,7 @@
     $("shaftTotal").textContent = meters + " / " + MAX_DEPTH.toLocaleString() + " m";
     $("gaugeNumber").textContent = meters + " m";
     // Two mirrored 320px tiles repeat seamlessly, even across long runs.
-    $("terrain").style.transform = "translate3d(0,-" + ((value * 1.1) % 640).toFixed(2) + "px,0)";
+    $("terrain").style.transform = "translate3d(0,-" + ((value * 2.4) % 640).toFixed(2) + "px,0)";
     $("gauge").setAttribute("aria-label", meters + " meters deep");
   }
 
@@ -471,6 +475,18 @@
   $("nextBtn").addEventListener("click", advance);
 
   updateBest();
+  function fitTerrain() {
+    const count = Math.ceil(window.innerHeight / 320) + 3;
+    const terrain = $("terrain");
+    if (terrain.children.length === count) return;
+    terrain.replaceChildren(...Array.from({ length: count }, () => {
+      const band = document.createElement("div");
+      band.className = "terrain-band";
+      return band;
+    }));
+  }
+  window.addEventListener("resize", fitTerrain);
+  fitTerrain();
   renderDrill();
   const revision = window.DEEP_CUT_REVISION;
   if (typeof revision === "string" && /^[a-f0-9]{40}$/.test(revision)) {

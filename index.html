@@ -9,7 +9,9 @@
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <div class="backdrop-grid" aria-hidden="true"></div>
+  <div class="world-backdrop" id="excavationWorld" aria-hidden="true">
+    <div class="terrain" id="terrain"></div>
+  </div>
   <header class="topbar">
     <a href="https://focustap.github.io/BenGames/" class="backlink"><span class="back-arrow" aria-hidden="true">←</span> BACK TO BENGAMES</a>
     <div class="mini-brand" aria-label="Deep Cut">DEEP <span>CUT</span></div>
@@ -29,9 +31,9 @@
           </div>
         </div>
         <div class="art-scene" aria-hidden="true">
-          <div class="stone-lines"></div><div class="shaft"></div>
+
           <span class="art-label">BELOW THE SURFACE</span>
-          <img class="home-drill" src="assets/drill.webp" width="256" height="384" alt="">
+          <img class="home-drill" src="assets/drill-cutout.png" width="256" height="384" alt="">
           <span class="art-distance">↓ +200 m</span>
         </div>
       </div>
@@ -83,25 +85,24 @@
             <span id="roundHint" class="tiny-tip">10 questions · 30 seconds each</span>
           </div>
         </div>
-        <section class="shaft-card" aria-label="Drill progress animation">
-          <div class="shaft-head"><span>BELOW THE SURFACE</span><strong id="shaftTotal">0 / 2,000 m</strong></div>
+        <section class="drill-stage" aria-label="Drill progress animation">
+
           <div class="gauge" id="gauge" role="img" aria-label="0 meters deep">
-            <div class="terrain" id="terrain" aria-hidden="true"><div class="terrain-band"></div><div class="terrain-band"></div><div class="terrain-band"></div><div class="terrain-band"></div></div>
-            <div class="gauge-shaft" aria-hidden="true"></div>
             <div class="gauge-drill" id="gaugeDrill" aria-hidden="true">
-              <img class="drill-sprite" src="assets/drill.webp" width="256" height="384" alt="">
+              <img class="drill-sprite" src="assets/drill-cutout.png" width="256" height="384" alt="">
+              <div class="drill-auger"><img src="assets/drill-cutout.png" width="256" height="384" alt=""></div>
             </div>
             <div class="gauge-depth" id="gaugeNumber">0 m</div>
             <div class="drill-dust" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i></div>
             <div class="scene-feedback" id="sceneFeedback" aria-hidden="true"><span id="sceneLabel"></span><strong id="scenePoints"></strong></div>
           </div>
-          <p class="drill-caption">One valid answer. One deeper dig.</p>
+          <p class="drill-caption">BELOW THE SURFACE <span aria-hidden="true">·</span> <strong id="shaftTotal">0 / 2,000 m</strong></p>
         </section>
       </div>
-      <section class="history" aria-label="Answers submitted">
-        <h3>YOUR DIG LOG</h3>
+      <details class="history">
+        <summary>YOUR DIG LOG</summary>
         <div id="historyList" class="history-list"><p class="history-empty">Answers will appear here as you dig.</p></div>
-      </section>
+      </details>
     </section>
     <section id="endScreen" hidden aria-label="End of game">
       <div class="end-card">

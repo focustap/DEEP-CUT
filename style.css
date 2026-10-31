@@ -30,12 +30,21 @@ button:disabled { cursor: not-allowed; opacity: .55; }
 button:focus-visible, a:focus-visible, input:focus-visible { outline: 3px solid var(--aqua); outline-offset: 3px; }
 a { color: inherit; text-decoration: none; }
 [hidden] { display: none !important; }
-.backdrop-grid {
-  position: fixed; pointer-events: none; z-index: -1; inset: 0;
-  background-image: linear-gradient(90deg, #72c5e508 1px, transparent 1px), linear-gradient(#72c5e508 1px, transparent 1px);
-  background-size: 48px 48px;
-  mask-image: linear-gradient(to bottom, #0009, transparent 85%);
+/* The underground world fills the viewport; only the terrain moves. */
+body { isolation: isolate; }
+.world-backdrop { position: fixed; z-index: -1; inset: 0; overflow: hidden;
+  pointer-events: none; background: #102132;
 }
+.world-backdrop::after { content: ""; position: absolute; inset: 0;
+  background: linear-gradient(180deg, #06111dba, #08142140 45%, #08142130 75%, #06111d80),
+    radial-gradient(ellipse at 50% 35%, #09233228, #05101c50);
+}
+.terrain { position: absolute; inset: 0 0 auto; opacity: .85; }
+.terrain-band { height: 320px; background: url("assets/ground.webp") center top / 560px 320px repeat-x; }
+.terrain-band:nth-child(even) { transform: scaleY(-1); }
+.world-backdrop.is-drilling .terrain { will-change: transform; }
+.world-backdrop.is-deep::after { animation: depth-light 1.8s ease-out; }
+@keyframes depth-light { 30% { opacity: .6; } }
 .topbar {
   width: min(1220px, calc(100% - 40px)); margin: 0 auto; min-height: 83px;
   display: flex; align-items: center; justify-content: space-between; gap: 18px;
@@ -81,21 +90,9 @@ h1, h2, h3, p { margin-top: 0; }
 .secondary:hover:not(:disabled) { background: #20394e; }
 .best-pill { display: inline-flex; align-items: center; gap: 9px; color: #e1bf77; font-weight: 700; font-size: 13px; }
 .best-pill strong { font-size: 16px; color: #f5d999; }
-.art-scene {
-  min-height: 450px; position: relative; overflow: hidden;
-  border-radius: 16px; border: 1px solid #2c4458;
-  background: #101d2c; box-shadow: 0 20px 60px #0004;
-}
-.art-scene:after { content: ""; position: absolute; inset: 0; pointer-events: none;
-  background: radial-gradient(ellipse at 50% 45%, transparent 15%, #080e18b0 100%);
-}
-.stone-lines { position: absolute; inset: 0; opacity: .6; background: url("assets/ground.webp") center / 450px; }
-.shaft { position: absolute; inset: 0 auto 0 50%; width: 140px; transform: translateX(-50%);
-  background: linear-gradient(90deg, #09131dda, #09131df5 30% 70%, #09131dda);
-  border-inline: 1px solid #47758440;
-}
+.art-scene { min-height: 450px; position: relative; }
 .home-drill { width: 150px; height: auto; position: absolute; top: 23%; left: 50%; z-index: 2;
-  transform: translateX(-50%); filter: drop-shadow(0 8px 12px #0006);
+  transform: translateX(-50%);
 }
 .art-label { position: absolute; z-index: 2; top: 22px; left: 22px; font-size: 11px; color: #bfd6e6; letter-spacing: .18em; font-weight: 800; }
 .art-distance { position: absolute; z-index: 2; bottom: 22px; right: 22px; padding: 9px 14px; border: 1px solid #8fe7d063; border-radius: 5px; background: #0d1d2bdb; color: #83e6d6; font-family: ui-monospace, monospace; font-weight: 900; }
@@ -118,7 +115,7 @@ h1, h2, h3, p { margin-top: 0; }
 .stat strong { display: block; font-size: 25px; letter-spacing: -.035em; }
 .stat strong em { font-style: normal; color: #a1b8c6; font-size: 13px; }
 .game-grid { display: flex; flex-direction: column; gap: 14px; }
-.question-card, .shaft-card { border: 1px solid #2c4458; border-radius: 12px; background: #101d2c; overflow: hidden; }
+.question-card { border: 1px solid #2c4458; border-radius: 12px; background: #101d2c; overflow: hidden; }
 .question-card { padding: clamp(24px, 4vw, 39px); min-height: 545px; position: relative; }
 .progress-top { display: flex; align-items: center; justify-content: space-between; color: #8ca8ba; font-size: 11px; letter-spacing: .1em; font-weight: 800; }
 .segment-track { display: grid; grid-template-columns: repeat(10, 1fr); gap: 5px; margin-top: 12px; }
@@ -151,7 +148,7 @@ h1, h2, h3, p { margin-top: 0; }
   background: #3e29243d; border-radius: 6px; color: #f2c1ab; font-size: 13px;
 }
 .history { margin-top: 25px; }
-.history h3 { font-size: 13px; color: #96b1c4; letter-spacing: .13em; margin-bottom: 13px; }
+.history summary { cursor: pointer; padding: 14px 0; font-size: 13px; color: #96b1c4; letter-spacing: .13em; margin-bottom: 13px; }
 .history-list { display: flex; flex-direction: column; gap: 8px; }
 .history-entry { display: flex; gap: 12px; align-items: center; background: #101b2b; border: 1px solid #2a4153; padding: 12px 16px; border-radius: 6px; }
 .history-entry b { flex: 1; font-size: 13px; overflow-wrap: anywhere; }
@@ -225,41 +222,25 @@ h1, h2, h3, p { margin-top: 0; }
 .topbar-meta { display: flex; align-items: center; gap: 18px; }
 .build-revision { color: #92b4c4; font: 11px ui-monospace, monospace; white-space: nowrap; letter-spacing: .04em; }
 .build-revision:hover { color: var(--aqua-hi); }
-.stats strong, .shaft-head strong, .gauge-depth { font-variant-numeric: tabular-nums; }
-.shaft-card { padding: 12px 16px 9px; background: #0d1926; }
-.shaft-head { display: flex; justify-content: space-between; align-items: center; gap: 12px;
-  font-size: 10px; font-weight: 750; letter-spacing: .12em; color: #7f9aaa;
+.stats strong, .gauge-depth { font-variant-numeric: tabular-nums; }
+/* The rig sits in open space below the question, with no card or shaft. */
+.drill-stage { position: relative; }
+.gauge { height: 210px; position: relative; --dig-duration: 1200ms; --dig-dip: 6px; }
+.gauge-depth { position: absolute; left: 50%; bottom: 0; transform: translateX(-50%);
+  font: 600 16px ui-monospace, monospace; color: #c0e4e7; white-space: nowrap;
+  text-shadow: 0 2px 8px #000;
 }
-.shaft-head strong { color: #a3c9cd; letter-spacing: .02em; white-space: nowrap; }
-.gauge {
-  height: 166px; margin-top: 9px; border-radius: 8px; border: 1px solid #284152;
-  position: relative; overflow: hidden; isolation: isolate; contain: layout paint;
-  background: #111f30; --dig-duration: 1000ms; --dig-dip: 4px;
+.gauge-drill { position: absolute; left: 50%; top: 46%; width: 110px; height: 165px;
+  transform: translate(-50%, -50%);
 }
-.gauge::after { content: ""; position: absolute; z-index: 2; inset: 0; pointer-events: none;
-  background: linear-gradient(180deg, #08132190, transparent 28% 70%, #081321b0),
-    linear-gradient(90deg, #08132170, transparent 35% 65%, #08132170);
-}
-.terrain { position: absolute; inset: 0 0 auto; height: 1280px; opacity: .65; }
-.terrain-band { height: 320px; background: url("assets/ground.webp") center top / 320px 320px repeat-x; }
-.terrain-band:nth-child(even) { transform: scaleY(-1); }
-.gauge.is-drilling .terrain { will-change: transform; }
-.gauge-shaft {
-  position: absolute; z-index: 1; inset: 0 auto 0 50%; transform: translateX(-50%);
-  width: 98px; background: linear-gradient(90deg, #07121ed9, #081421f5 30% 70%, #07121ed9);
-  border-inline: 1px solid #57829540; box-shadow: 0 0 15px #0003;
-}
-.gauge-depth { position: absolute; z-index: 3; right: 13px; top: 11px;
-  font: 600 12px ui-monospace, monospace; color: #bcdde1;
-  padding: 4px 7px; border-radius: 4px; background: #0a1724bd;
-}
-.gauge-drill { position: absolute; z-index: 3; left: 50%; top: 50%; width: 76px; height: 114px;
-  transform: translate(-50%, -50%); filter: drop-shadow(0 4px 5px #0007);
-}
-.drill-sprite { display: block; width: 100%; height: 100%; object-fit: contain; }
+.drill-sprite { display: block; width: 100%; height: 100%; object-fit: contain; clip-path: inset(0 0 33% 0); }
+.drill-auger { position: absolute; inset: 0; clip-path: inset(67% 0 0 0); }
+.drill-auger img { display: block; width: 100%; height: 100%; }
+.gauge.is-drilling .drill-auger { animation: auger-turn 110ms linear infinite alternate; }
+@keyframes auger-turn { to { transform: scaleX(.82); } }
 .gauge.is-drilling .gauge-drill { animation: drill-dip var(--dig-duration) ease-out both; }
 .gauge.is-drilling .drill-sprite { animation: drill-vibration 90ms linear infinite; }
-.drill-dust { position: absolute; z-index: 3; left: 50%; top: calc(50% + 39px); pointer-events: none; }
+.drill-dust { position: absolute; z-index: 3; left: 50%; top: calc(46% + 70px); pointer-events: none; }
 .drill-dust i { position: absolute; width: 3px; height: 3px; border-radius: 1px; background: #87a9b6;
   opacity: 0; --dust-x: -29px; --dust-y: -19px; --delay: 0ms;
 }
@@ -270,7 +251,7 @@ h1, h2, h3, p { margin-top: 0; }
 .drill-dust i:nth-child(6) { --dust-x: 40px; --dust-y: -18px; --delay: 450ms; }
 .gauge.is-drilling .drill-dust i { animation: drill-dust 520ms var(--delay) ease-out both; }
 .gauge.is-deep .drill-dust i { animation-iteration-count: 2; background: #a4c6cb; }
-.scene-feedback { position: absolute; z-index: 4; top: 50%; left: calc(50% + 68px);
+.scene-feedback { position: absolute; z-index: 4; top: 50%; left: calc(50% + 82px);
   transform: translateY(-50%); opacity: 0; pointer-events: none;
 }
 .scene-feedback span { display: block; font-size: 9px; font-weight: 800; letter-spacing: .1em; color: #8bb4bd; }
@@ -278,7 +259,9 @@ h1, h2, h3, p { margin-top: 0; }
 .scene-feedback.active { animation: reward-reveal var(--dig-duration) ease-out both; }
 .gauge.is-deep .scene-feedback span { color: #efd393; }
 .gauge.is-deep .scene-feedback strong { color: #ffe4a9; }
-.drill-caption { text-align: center; margin: 6px 0 0; color: #708e9f; font-size: 10px; }
+.drill-caption { text-align: center; margin: 8px 0 0; color: #9bb9c6; font-size: 10px; letter-spacing: .1em; }
+.drill-caption strong { font-weight: 500; }
+.drill-caption span { margin: 0 6px; }
 .graded.timeout { --flash: #ffaf9b; border-color: #765251; }
 .graded { padding: 16px 20px; display: grid; grid-template-columns: minmax(0,1fr) auto; gap: 4px 16px; }
 .graded-label { font-size: 24px; }
@@ -309,17 +292,13 @@ h1, h2, h3, p { margin-top: 0; }
 }
 @media (max-width: 740px) {
   .topbar-meta { gap: 10px; }
-  .shaft-card { padding: 10px 12px 8px; }
   .category-eyebrow { margin-top: 26px; }
   .progress-top { gap: 12px; flex-wrap: wrap; font-size: 10px; }
 }
 @media (max-width: 500px) {
   .topbar { flex-wrap: wrap; gap: 10px; }
   .build-revision { font-size: 10px; }
-  .gauge { height: 152px; }
-  .gauge-drill { width: 68px; height: 102px; }
-  .gauge-shaft { width: 86px; }
-  .scene-feedback { left: calc(50% + 50px); }
+  .scene-feedback { left: calc(50% + 62px); }
   .scene-feedback span { font-size: 8px; letter-spacing: .02em; }
   .scene-feedback strong { font-size: 21px; }
   .graded { padding: 14px; gap: 4px 10px; }
@@ -329,4 +308,56 @@ h1, h2, h3, p { margin-top: 0; }
 }
 @media (prefers-reduced-motion: reduce) {
   .scene-feedback.active { opacity: 1; }
+}
+
+body.is-playing .container { width: min(820px, calc(100% - 40px)); padding-top: 24px; }
+body.is-playing .game-head { align-items: center; margin-bottom: 18px; }
+body.is-playing .game-head h1 { font-size: 28px; }
+body.is-playing .game-head .eyebrow { font-size: 9px; }
+body.is-playing .stat { padding: 8px 12px; min-width: 100px; background: #0c1b28d9; }
+body.is-playing .stat strong { font-size: 22px; }
+body.is-playing .question-card { padding: 24px 28px 18px; background: #0b1b2bf2;
+  border-color: #466679; box-shadow: 0 15px 50px #0004;
+}
+body.is-playing .category-eyebrow { margin-top: 19px; margin-bottom: 9px; }
+body.is-playing .prompt { font-size: clamp(28px, 4vw, 40px); margin-bottom: 10px; }
+body.is-playing .hint { margin-bottom: 18px; }
+body.is-playing .tiny-tip { font-size: 11px; }
+body.is-playing .question-card:has(.graded:not([hidden])) > .tiny-tip { display: none; }
+body.is-playing .question-card:has(.graded:not([hidden])) #roundHint { visibility: hidden; }
+body.is-playing .graded { margin-top: 12px; padding: 12px 16px; gap: 2px 12px; animation: none; }
+body.is-playing .graded .result-actions { height: 0; margin: 0; }
+body.is-playing .graded .result-actions .primary { position: absolute; right: 24px; bottom: 16px; padding: 9px 12px; }
+body.is-playing .history { border-top: 1px solid #54718450; margin-top: 28px; }
+body.is-playing .footer { font-size: 10px; margin-top: 24px; padding-top: 16px; }
+@media (max-width: 600px) {
+  .topbar { min-height: 64px; gap: 8px; }
+  .save-tag { display: none; }
+  .backlink { font-size: 9px; gap: 6px; }
+  .mini-brand { font-size: 11px; }
+  .build-revision { font-size: 9px; }
+  body.is-playing .container { width: calc(100% - 24px); padding-top: 14px; }
+  body.is-playing .game-head { flex-wrap: nowrap; gap: 8px; margin-bottom: 14px; }
+  body.is-playing .game-head .eyebrow { display: none; }
+  body.is-playing .game-head h1 { font-size: 22px; margin: 0; }
+  body.is-playing .stats { width: auto; gap: 7px; }
+  body.is-playing .stat { min-width: 70px; padding: 6px 9px; }
+  body.is-playing .stat > span { font-size: 8px; letter-spacing: .02em; white-space: nowrap; }
+  body.is-playing .stat strong { font-size: 18px; }
+  body.is-playing .question-card { padding: 18px 16px 14px; }
+  body.is-playing .progress-top { font-size: 9px; gap: 5px; }
+  body.is-playing .timer-wrap { margin-top: 14px; }
+  body.is-playing .timer-header strong { font-size: 21px; }
+  body.is-playing .timer-notice { font-size: 10px; }
+  body.is-playing .prompt { font-size: 30px; }
+  body.is-playing .hint { font-size: 12px; margin-bottom: 14px; }
+  body.is-playing .answer-form { grid-template-columns: minmax(0,1fr) auto; gap: 7px; }
+  body.is-playing .answer-input { padding: 13px 10px; font-size: 16px; }
+  body.is-playing .answer-form .primary { padding: 12px 13px; font-size: 10px; letter-spacing: 0; }
+  body.is-playing .question-card > .tiny-tip { line-height: 1.5; margin-top: 9px; }
+  body.is-playing .form-footer { margin-top: 10px; }
+  body.is-playing .graded .result-actions .primary { right: 16px; bottom: 14px; font-size: 10px; }
+  .gauge { height: 195px; }
+  .gauge-drill { width: 100px; height: 150px; }
+  .drill-dust { top: calc(46% + 62px); }
 }
